@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Grid, Typography, Paper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -25,31 +25,41 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const VideoPlayer = () => {
+    const { name, callAccepted, myVideo, userVideo, callEnded, stream, call } = useContext(SocketContext);
     const classes = useStyles();
 
     return (
         <Grid container className={classes.gridContainer}>
-            {/* Our wn video */}
-            <Paper className={classes.paper}>
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h5" gutterBottom>Our Name</Typography>
-                    {/* We want to mute our own video, autoplay to immediately start */}
-                    <video playsInline muted ref={null} autoPlay className={classes.video} />
-                </Grid>
-            </Paper>
+            {
+                // Our own video
+                // if there is a stream, then render our own stream
+                stream && (
+                    <Paper className={classes.paper}>
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="h5" gutterBottom>{name || "Donatello"}</Typography>
+                            {/* We want to mute our own video, autoplay to immediately start */}
+                            <video playsInline muted ref={myVideo} autoPlay className={classes.video} />
+                        </Grid>
+                    </Paper>
+                )
+            }
 
-            {/* User video */}
-            <Paper className={classes.paper}>
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h5" gutterBottom>User's Name</Typography>
-                    {/* We want to mute our own video, autoplay to immediately start */}
-                    <video playsInline ref={null} autoPlay className={classes.video} />
-                </Grid>
-            </Paper>
+            {
+                // User video
+                // Show user's stream if they are in the call
+                callAccepted && !callEnded && (
+                    < Paper className={classes.paper}>
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="h5" gutterBottom>{call.name || "Michelangelo"}</Typography>
+                            {/* We want to mute our own video, autoplay to immediately start */}
+                            <video playsInline ref={userVideo} autoPlay className={classes.video} />
+                        </Grid>
+                    </Paper>
+                )
+            }
 
-
-        </Grid>
-    )
+        </Grid >
+    );
 }
 
 export default VideoPlayer
