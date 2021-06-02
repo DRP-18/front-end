@@ -5,7 +5,7 @@ import Peer from "simple-peer";
 const SocketContext = createContext();
 
 /* Pass full URL of deployed server*/
-const socket = io("http://localhost:3000");
+const socket = io("http://localhost:5000");
 
 const ContextProvider = ({ children }) => {
     /*These are state fields */
