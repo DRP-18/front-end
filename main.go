@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"html/template"
 	"log"
 	"github.com/gorilla/websocket"
@@ -73,6 +74,16 @@ func chatHandler(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func GetPort() string {
+	port := os.Getenv("PORT")
+	// Set a default port if there is nothing in the environment
+	if port == "" {
+		port = "8080"
+		fmt.Println("INFO: No PORT environment variable detected, defaulting to " + port)
+	}
+	return ":" + port
+}
+
 func main() {
 	go broadcastMessage()
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./website"))))
@@ -81,5 +92,5 @@ func main() {
 	http.HandleFunc("/videoCall", serveSimplePage("videoCall.html"))
 	http.HandleFunc("/voiceCall", serveSimplePage("voiceCall.html"))
 	http.HandleFunc("/textChat", serveSimplePage("textChat.html"))
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(GetPort(), nil)
 }
