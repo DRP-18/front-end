@@ -21,22 +21,29 @@
   <link rel="preload" as="style" href="/static/assets/mobirise/css/mbr-additional.css"><link rel="stylesheet" href="/static/assets/mobirise/css/mbr-additional.css" type="text/css">
   
   
-  
+  <script src="/static/chat.js" defer></script>
   
 </head>
 <body>
   
   <section class="content5 cid-szca83hs2c" id="content5-s">
     
-    <div class="container">
+    <div class="container"> 
         <div class="row justify-content-center">
             <div class="col-md-12 col-lg-10">
-                
-                <h4 class="mbr-section-subtitle mbr-fonts-style mb-4 display-5">
-                    Enter your subtitle here
-                </h4>
-                <p class="mbr-text mbr-fonts-style display-7">
-                    You can use content blocks to arrange your articles, large texts, instructions. Combine these blocks with media blocks to add illustrations and video tutorials. You can use various content blocks to work with your text. Add quotations, lists, buttons. Select your text to change its formatting or add links. Mobirise is a simple website builder that helps you create amazing web pages without knowing any code.</p>
+
+                <div class="form-group">
+                    <label for="exampleFormControlTextarea3"></label>
+                    <textarea class="form-control" id="chatbacklog" rows="7"></textarea>
+                  </div>
+
+
+                <div class="form-group shadow-textarea">
+                    <label for="exampleFormControlTextarea6">Enter message</label>
+                    <textarea class="form-control z-depth-1" id="chatbox" rows="3" placeholder="Write something here..."></textarea>
+                  </div>
+
+                  <button type="button" class="btn btn-primary btn-rounded" onclick="sendMessage()">Send Message</button>
             </div>
         </div>
     </div>

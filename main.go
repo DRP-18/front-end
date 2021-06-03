@@ -28,7 +28,7 @@ func broadcastMessage() {
 		msg := <-messageChannel
 		for name, conn := range nameToConnections {
 			if name != msg.name {
-				conn.WriteMessage(msg.msgType, []byte(msg.name+" says: "+msg.msg))
+				conn.WriteMessage(msg.msgType, []byte(msg.msg))
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func chatHandler(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println(string(msg))
 		messageChannel <- message{
 			msgType: msgType,
-			name:    name,
+			name:    name,	
 			msg:     string(msg),
 		}
 	}
@@ -77,7 +77,7 @@ func main() {
 	go broadcastMessage()
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./website"))))
 	http.HandleFunc("/", serveSimplePage("index.html"))
-	http.HandleFunc("/chat", chatHandler)
+	http.HandleFunc("/textChat/chat", chatHandler)
 	http.HandleFunc("/videoCall", serveSimplePage("videoCall.html"))
 	http.HandleFunc("/voiceCall", serveSimplePage("voiceCall.html"))
 	http.HandleFunc("/textChat", serveSimplePage("textChat.html"))
