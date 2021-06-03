@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-
+	"html/template"
+	"log"
 	"github.com/gorilla/websocket"
 )
 
@@ -33,6 +34,53 @@ func broadcastMessage() {
 	}
 }
 
+func homePage(writer http.ResponseWriter, request *http.Request) {
+	template, err := template.ParseFiles("website/index.html")
+	if err != nil {
+		log.Print("Error parsing template: ", err)
+	}
+	err = template.Execute(writer, nil)
+	if err != nil {
+		log.Print("Error during executing: ", err)
+	}
+}
+func videoCallPage(writer http.ResponseWriter, request *http.Request) {
+	template, err := template.ParseFiles("website/videoCall.html")
+	if err != nil {
+		log.Print("Error parsing template: ", err)
+	}
+	err = template.Execute(writer, nil)
+	if err != nil {
+		log.Print("Error during executing: ", err)
+	}
+}
+
+func voiceCallPage(writer http.ResponseWriter, request *http.Request) {
+
+	template, err := template.ParseFiles("website/voiceCall.html")
+	if err != nil {
+		log.Print("Error parsing template: ", err)
+	}
+	err = template.Execute(writer, nil)
+	if err != nil {
+		log.Print("Error during executing: ", err)
+	}
+}
+
+func messagePage(writer http.ResponseWriter, request *http.Request) {
+
+	template, err := template.ParseFiles("website/textChat.html")
+	if err != nil {
+		log.Print("Error parsing template: ", err)
+	}
+	err = template.Execute(writer, nil)
+	if err != nil {
+		log.Print("Error during executing: ", err)
+	}
+}
+
+
+
 func chatHandler(writer http.ResponseWriter, request *http.Request) {
 	name := request.Header.Get("name")
 	connectedUsers++
@@ -61,6 +109,11 @@ func chatHandler(writer http.ResponseWriter, request *http.Request) {
 
 func main() {
 	go broadcastMessage()
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./website"))))
+	http.HandleFunc("/", homePage)
 	http.HandleFunc("/chat", chatHandler)
+	http.HandleFunc("/videoCall", videoCallPage)
+	http.HandleFunc("/voiceCall", voiceCallPage)
+	http.HandleFunc("/textChat", messagePage)
 	http.ListenAndServe(":8080", nil)
 }
