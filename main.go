@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
@@ -137,8 +136,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	http.Handle("/static/", http.FileServer(appBox.HTTPBox()))
-	http.Handle("/static2/", http.StripPrefix("/static", http.FileServer(http.Dir("./website"))))
+	http.Handle("/static2/", http.StripPrefix("/static2", http.FileServer(http.Dir("./website"))))
 	http.HandleFunc("/", serveSimplePage("index.html"))
 	http.HandleFunc("/textChat/chat", chatHandler)
 	http.HandleFunc("/videoCall", serveAppHandler(appBox))

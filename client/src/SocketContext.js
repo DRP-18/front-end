@@ -5,7 +5,7 @@ import Peer from "simple-peer";
 const SocketContext = createContext();
 
 /* Pass full URL of deployed server*/
-const socket = io("http://localhost:8080");
+const socket = io("https://tutor-me-drp.herokuapp.com/");
 
 const ContextProvider = ({ children }) => {
     /*These are state fields */
@@ -48,6 +48,7 @@ const ContextProvider = ({ children }) => {
 
         peer.on("signal", (data) => {
             socket.emit("answercall", { signal: data, to: call.from })
+            console.log("answercall sent")
         });
         peer.on("stream", (currentStream) => {
             /* This is the other persons stream*/
@@ -66,6 +67,8 @@ const ContextProvider = ({ children }) => {
 
         peer.on("signal", (data) => {
             socket.emit("calluser", { userToCall: id, signalData: data, from: me, name })
+            console.log("calluser sent")
+            console.log(me)
         });
         peer.on("stream", (currentStream) => {
             userVideo.current.srcObject = currentStream;
