@@ -18,7 +18,6 @@ app.get("/", (req, res) => {
     res.send(`Server is running on port ${PORT}`);
 });
 
-
 io.on("connection", socket => {
     /* Will emit socket ID as soon as the connection opens*/
     socket.emit("me", socket.id);
@@ -37,7 +36,7 @@ io.on("connection", socket => {
 });
 
 
-server.listen(PORT, "0.0.0.0", () => console.log(`Server is listening on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
 
 
 

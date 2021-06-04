@@ -7,9 +7,13 @@ import (
 	"html/template"
 	"log"
 	"github.com/gorilla/websocket"
+	socketio "github.com/googollee/go-socket.io"
+	rice "github.com/GeertJohan/go.rice"
+	"time"
 )
 
 var (
+	
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
@@ -37,6 +41,7 @@ func broadcastMessage() {
 
 func serveSimplePage(page string) func (writer http.ResponseWriter, request *http.Request) {
 	return func (writer http.ResponseWriter, request *http.Request) {	
+		(writer).Header().Set("Access-Control-Allow-Origin", "*")
 		template, err := template.ParseFiles(fmt.Sprintf("website/%s", page))
 		if err != nil {
 			log.Print("Error parsing template: ", err)
@@ -84,12 +89,60 @@ func GetPort() string {
 	return ":" + port
 }
 
+func setUpVideoChatSockets() *socketio.Server {
+	server := socketio.NewServer(nil)
+
+    server.OnConnect("/videoCall", func(so socketio.Conn) error {
+		so.Emit("me", so.ID())
+		return nil
+	})
+
+	server.OnEvent("/videoCall", "disconnect", func (so socketio.Conn) {
+		server.BroadcastToNamespace("/videoCall", "callended")
+	})
+
+	server.OnEvent("/videoCall", "calluser", func (so socketio.Conn, userToCall, singalData, from, name string) {
+		server.BroadcastToRoom(userToCall, singalData, from, name)
+	})
+
+	server.OnEvent("/videoCall", "answercall", func (so socketio.Conn, data struct {to string; signal string}) {
+		server.BroadcastToRoom(data.to, "callaccepted", data.signal)
+	})
+
+	return server
+}
+
+func serveAppHandler(app *rice.Box) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		indexFile, err := app.Open("index.html")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		http.ServeContent(w, r, "index.html", time.Time{}, indexFile)
+	}
+}
+
 func main() {
 	go broadcastMessage()
-	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./website"))))
+
+	server := setUpVideoChatSockets()
+	go server.Serve()
+	defer server.Close()
+	http.Handle("/socket.io/", server)
+	
+	// Define the rice box with the frontend client static files.
+	appBox, err := rice.FindBox("./client/build")
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.Handle("/static/", http.FileServer(appBox.HTTPBox()))
+	http.Handle("/static2/", http.StripPrefix("/static", http.FileServer(http.Dir("./website"))))
 	http.HandleFunc("/", serveSimplePage("index.html"))
 	http.HandleFunc("/textChat/chat", chatHandler)
-	http.HandleFunc("/videoCall", serveSimplePage("videoCall.html"))
+	http.HandleFunc("/videoCall", serveAppHandler(appBox))
+	// http.HandleFunc("/videoCall", serveSimplePage("videoCall.html"))
 	http.HandleFunc("/voiceCall", serveSimplePage("voiceCall.html"))
 	http.HandleFunc("/textChat", serveSimplePage("textChat.html"))
 	http.ListenAndServe(GetPort(), nil)
